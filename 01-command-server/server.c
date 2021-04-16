@@ -5,11 +5,14 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #define PORT 2323
 #define BUFFER_LENGHT 10
 
 void main(){
+    time_t result = time(NULL);
+    printf("The current time is %s",  asctime(localtime(&result)));
 
 	int sockfd;
 	struct sockaddr_in serverAddr;
@@ -34,12 +37,16 @@ void main(){
 	listen(sockfd, 5);
 	printf("[+]Listening...\n");
     memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);
-    
+
 	while(newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size)){
 		while (recv(newSocket, buffer, BUFFER_LENGHT, 0)>0) {
 			printf("Message Received: %s", buffer);
 			if(buffer[0] == 'q' && buffer[1] == 'u')
 				break;
+            else if (buffer[0] == 't' && buffer[1] == 'i'){
+                strcpy(msgBuffer, asctime(localtime(&result)));
+                send(newSocket, msgBuffer, strlen(msgBuffer), 0);}
+            
             send(newSocket, msgBuffer, strlen(msgBuffer), 0);    
 			memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);}
 		printf("[+]Closing the connection.\n");
