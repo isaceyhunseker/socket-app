@@ -30,9 +30,8 @@ void main(){
 		printf("Enter a message, write 'qu' to close the chat: ");
 		fgets(msgBuffer, 1024, stdin);
 		send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
-			if(msgBuffer[0] == 'q' && msgBuffer[1] == 'u'){
+		if(msgBuffer[0] == 'q' && msgBuffer[1] == 'u')
 				break;
-			}
 	}
 	printf("[+]Closing the connection.\n");
 	shutdown(clientSocket, SHUT_RDWR);
