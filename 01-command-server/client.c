@@ -5,16 +5,15 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include 
 
 #define PORT 2323
-#define BUFFER_LENGHT 10
-#define help "help"
+#define BUFFER_LENGHT 100
 
 void main(){
 	int clientSocket;
 	struct sockaddr_in serverAddr;
 	char msgBuffer[BUFFER_LENGHT], rcvBuffer[BUFFER_LENGHT];
+	char *token;
 	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
 	printf("[+]Client Socket Created Sucessfully.\n");
 
@@ -30,17 +29,23 @@ void main(){
 	while(1) {
 		printf("Enter command:(help to see all commands) ");
 		fgets(msgBuffer, BUFFER_LENGHT, stdin);
-
-		send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
-		if(msgBuffer[0] == 'q' && msgBuffer[1] == 'u')
-			break;
-		if(strncmp(msgBuffer,help,sizeof(help)) == 0){
-        	printf("you got it");
+		
+		if(strncmp(msgBuffer,"help", strlen("help")) == 0){
+        	printf("I am going to open help file\n");
         }
-		recv(clientSocket, rcvBuffer, BUFFER_LENGHT, 0);
-		printf("\nreceived answer:%s\n", rcvBuffer);
+
+		else if(strncmp(msgBuffer,"exit", strlen("exit")) == 0){
+			send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
+			return;
+		}
+
+		else if(strncmp(msgBuffer,"command", strlen("command")) == 0){
+			send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
+			recv(clientSocket, rcvBuffer, BUFFER_LENGHT, 0);
+		}
 		memset(rcvBuffer, '\0', sizeof(char)*BUFFER_LENGHT);
 	}
 	printf("[+]Closing the connection.\n");
 	shutdown(clientSocket, SHUT_RDWR);
 }
+
