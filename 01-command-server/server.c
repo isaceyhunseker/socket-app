@@ -59,27 +59,25 @@ void main(){
 				cmd_type = strtok(NULL, ",");
 				cmd_input = strtok(NULL, ",");
 
-				if(strncmp(cmd_type,"datetime", strlen("datetime")) == 0){
-					//printf("icerdeyim %s",cmd_type);
-					strcpy(msgBuffer, asctime(localtime(&result)));//asctime(localtime(&result))
-                	
-				}
+				if(strncmp(cmd_type,"datetime", strlen("datetime")) == 0)
+					strcpy(msgBuffer, asctime(localtime(&result)));
+
 
 				else if(strncmp(cmd_type,"login", strlen("login")) == 0){
 					username = cmd_input;
-					strcat(msgBuffer, "the user has login: ");
+					strcat(msgBuffer, "[+]The user has login: ");
 					strcat(msgBuffer, username);
                 	
 				}
 
 				else if(strncmp(cmd_type,"begin", strlen("begin")) == 0){
 					if(!username){
-						strcat(msgBuffer, "you need to login before chat");
+						strcat(msgBuffer, "[!]Login before chat");
                 	    send(newSocket, msgBuffer, strlen(msgBuffer), 0);
 						break;
 					}
 					dest_user = cmd_input;
-					strcat(msgBuffer, "the user ");
+					strcat(msgBuffer, "[+]The user ");
 					strcat(msgBuffer, username);
 					strcat(msgBuffer, "begin the chat with ");
 					strcat(msgBuffer, dest_user);
@@ -88,12 +86,12 @@ void main(){
 
 				else if(strncmp(cmd_type,"end", strlen("end")) == 0){
 					if(!username || !dest_user){
-						strcat(msgBuffer, "there is no chat between these users");
+						strcat(msgBuffer, "[!]There is no chat between these users");
                 	    send(newSocket, msgBuffer, strlen(msgBuffer), 0);
 						break;
 					}
 					dest_user = cmd_input;
-					strcat(msgBuffer, "the chat between ");
+					strcat(msgBuffer, "[+]The chat between ");
 					strcat(msgBuffer, username);
 					strcat(msgBuffer, "and");
 					strcat(msgBuffer, dest_user);
@@ -101,7 +99,7 @@ void main(){
                 	
 				}
 				else{
-					printf("invalid second param");
+					printf("[!]Invalid second param");
 					return;
 				}
 				send(newSocket, msgBuffer, strlen(msgBuffer), 0);
