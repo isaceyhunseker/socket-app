@@ -9,7 +9,8 @@
 #define PORT 2323
 #define BUFFER_LENGHT 100
 
-void main(){
+void main()
+{
 	int clientSocket;
 	struct sockaddr_in serverAddr;
 	char msgBuffer[BUFFER_LENGHT], rcvBuffer[BUFFER_LENGHT];
@@ -22,37 +23,41 @@ void main(){
 	serverAddr.sin_port = htons(PORT);
 	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-	if(connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1){
+	if (connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
+	{
 		printf("[!]Connection Error");
 		exit(0);
 	}
 	printf("[+]Connected to Server.\n");
-	memset(rcvBuffer, '\0', sizeof(char)*BUFFER_LENGHT);
+	memset(rcvBuffer, '\0', sizeof(char) * BUFFER_LENGHT);
 
-	while(1) {
+	while (1)
+	{
 		printf("Enter command:(help to see all commands) ");
 		fgets(msgBuffer, BUFFER_LENGHT, stdin);
-		
-		if(strncmp(msgBuffer,"help", strlen("help")) == 0){
-        	printf("I am going to open help file\n");
-        }
 
-		else if(strncmp(msgBuffer,"command", strlen("command")) == 0){
+		if (strncmp(msgBuffer, "help", strlen("help")) == 0)
+		{
+			printf("I am going to open help file\n");
+		}
+
+		else if (strncmp(msgBuffer, "command", strlen("command")) == 0)
+		{
 			send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
 			recv(clientSocket, rcvBuffer, BUFFER_LENGHT, 0);
 		}
 
-		else if(strncmp(msgBuffer,"exit", strlen("exit")) == 0){
+		else if (strncmp(msgBuffer, "exit", strlen("exit")) == 0)
+		{
 			send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
 			return;
 		}
 		else
 			printf("Invalid command:(help to see all commands)");
-			
-		printf("%s",rcvBuffer);
-		memset(rcvBuffer, '\0', sizeof(char)*BUFFER_LENGHT);
+
+		printf("%s", rcvBuffer);
+		memset(rcvBuffer, '\0', sizeof(char) * BUFFER_LENGHT);
 	}
 	printf("[+]Closing the connection.\n");
 	shutdown(clientSocket, SHUT_RDWR);
 }
-
