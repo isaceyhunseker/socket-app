@@ -34,15 +34,19 @@ void main(){
         	printf("I am going to open help file\n");
         }
 
-		else if(strncmp(msgBuffer,"exit", strlen("exit")) == 0){
-			send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
-			return;
-		}
-
 		else if(strncmp(msgBuffer,"command", strlen("command")) == 0){
 			send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
 			recv(clientSocket, rcvBuffer, BUFFER_LENGHT, 0);
 		}
+
+		else if(strncmp(msgBuffer,"exit", strlen("exit")) == 0){
+			send(clientSocket, msgBuffer, strlen(msgBuffer), 0);
+			return;
+		}
+		else
+			printf("Invalid command:(help to see all commands)");
+			
+		
 		memset(rcvBuffer, '\0', sizeof(char)*BUFFER_LENGHT);
 	}
 	printf("[+]Closing the connection.\n");

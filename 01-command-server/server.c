@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define PORT 2323
-#define BUFFER_LENGHT 10
+#define BUFFER_LENGHT 100
 
 void main(){
     time_t result = time(NULL);
@@ -22,6 +22,7 @@ void main(){
 
 	socklen_t addr_size;
 	char buffer[BUFFER_LENGHT], msgBuffer[BUFFER_LENGHT] = "sea";
+	char *cmd_type, *cmd_input, *username=NULL, *dest_user=NULL;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	printf("[+]Server Socket Created Sucessfully.\n");
@@ -39,16 +40,60 @@ void main(){
     memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);
 
 	while(newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size)){
-		while (recv(newSocket, buffer, BUFFER_LENGHT, 0)>0) {
+		while ((recv(newSocket, buffer, BUFFER_LENGHT, 0)>0) && (strncmp(msgBuffer,"exit", strlen("exit")) != 0)) {
 			printf("Message Received: %s", buffer);
-			if(buffer[0] == 'q' && buffer[1] == 'u')
-				break;
-            else if (buffer[0] == 't' && buffer[1] == 'i'){
-                strcpy(msgBuffer, asctime(localtime(&result)));
-                send(newSocket, msgBuffer, strlen(msgBuffer), 0);}
+
+			if(strncmp(msgBuffer,"command", strlen("command")) == 0){
+				strtok(msgBuffer, "\t");//nonused just eliminate in parsing
+				cmd_type = strtok(NULL, "\t");
+				cmd_input = strtok(NULL, "\t");
+
+				if(strncmp(cmd_type,"datetime", strlen("datetime")) == 0){
+					strcpy(msgBuffer, asctime(localtime(&result)));
+                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+				}
+
+				else if(strncmp(cmd_type,"login", strlen("login")) == 0){
+					username = cmd_input;
+					strcat(msgBuffer, "the user has login: ");
+					strcat(msgBuffer, username);
+                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+				}
+
+				else if(strncmp(cmd_type,"begin", strlen("begin")) == 0){
+					if(!username){
+						strcat(msgBuffer, "you need to login before chat");
+                	    send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+						break;
+					}
+					dest_user = cmd_input;
+					strcat(msgBuffer, "the user ");
+					strcat(msgBuffer, username);
+					strcat(msgBuffer, "begin the chat with ");
+					strcat(msgBuffer, dest_user);
+                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+				}
+
+				else if(strncmp(cmd_type,"end", strlen("end")) == 0){
+					if(!username || !dest_user){
+						strcat(msgBuffer, "there is no chat between these users");
+                	    send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+						break;
+					}
+					dest_user = cmd_input;
+					strcat(msgBuffer, "the chat between ");
+					strcat(msgBuffer, username);
+					strcat(msgBuffer, "and");
+					strcat(msgBuffer, dest_user);
+					strcat(msgBuffer, "ended");
+                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+				}
+			}
+
             
-            send(newSocket, msgBuffer, strlen(msgBuffer), 0);    
-			memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);}
+            //send(newSocket, msgBuffer, strlen(msgBuffer), 0);    
+			memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);
+			memset(msgBuffer, '\0', sizeof(char)*BUFFER_LENGHT);}
 		printf("[+]Closing the connection.\n");
 		shutdown(newSocket, SHUT_RDWR);
 		exit(0);
