@@ -21,10 +21,13 @@ void main(){
 	struct sockaddr_in newAddr;
 
 	socklen_t addr_size;
-	char buffer[BUFFER_LENGHT], msgBuffer[BUFFER_LENGHT] = "sea";
+	char buffer[BUFFER_LENGHT], msgBuffer[BUFFER_LENGHT] ="sea";
 	char *cmd_type, *cmd_input, *username=NULL, *dest_user=NULL;
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+		printf("[!]Server Socket Not Created");
+		exit(-1);
+	}
 	printf("[+]Server Socket Created Sucessfully.\n");
 	memset(&serverAddr, '\0', sizeof(serverAddr));
 
@@ -35,29 +38,38 @@ void main(){
 	bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
 	printf("[+]Bind to Port number %d.\n", 2323);
 
-	listen(sockfd, 5);
+	if((listen(sockfd, 5)) == -1){
+		printf("[!]Listen Not Started");
+		exit(-1);
+	}
 	printf("[+]Listening...\n");
     memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);
+	memset(msgBuffer, '\0', sizeof(char)*BUFFER_LENGHT);
 
 	while(newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size)){
-		while ((recv(newSocket, buffer, BUFFER_LENGHT, 0)>0) && (strncmp(msgBuffer,"exit", strlen("exit")) != 0)) {
+		while ((recv(newSocket, buffer, BUFFER_LENGHT, 0)>0)) {
 			printf("Message Received: %s", buffer);
 
-			if(strncmp(msgBuffer,"command", strlen("command")) == 0){
-				strtok(msgBuffer, "\t");//nonused just eliminate in parsing
-				cmd_type = strtok(NULL, "\t");
-				cmd_input = strtok(NULL, "\t");
+			if(strncmp(buffer,"exit", strlen("exit")) == 0){
+				return;
+			}
+
+			if(strncmp(buffer,"command", strlen("command")) == 0){
+				strtok(buffer, ",");//nonused just eliminate in parsing
+				cmd_type = strtok(NULL, ",");
+				cmd_input = strtok(NULL, ",");
 
 				if(strncmp(cmd_type,"datetime", strlen("datetime")) == 0){
-					strcpy(msgBuffer, asctime(localtime(&result)));
-                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+					//printf("icerdeyim %s",cmd_type);
+					strcpy(msgBuffer, asctime(localtime(&result)));//asctime(localtime(&result))
+                	
 				}
 
 				else if(strncmp(cmd_type,"login", strlen("login")) == 0){
 					username = cmd_input;
 					strcat(msgBuffer, "the user has login: ");
 					strcat(msgBuffer, username);
-                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+                	
 				}
 
 				else if(strncmp(cmd_type,"begin", strlen("begin")) == 0){
@@ -71,7 +83,7 @@ void main(){
 					strcat(msgBuffer, username);
 					strcat(msgBuffer, "begin the chat with ");
 					strcat(msgBuffer, dest_user);
-                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+                	
 				}
 
 				else if(strncmp(cmd_type,"end", strlen("end")) == 0){
@@ -86,14 +98,16 @@ void main(){
 					strcat(msgBuffer, "and");
 					strcat(msgBuffer, dest_user);
 					strcat(msgBuffer, "ended");
-                	send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+                	
 				}
+				else{
+					printf("invalid second param");
+					return;
+				}
+				send(newSocket, msgBuffer, strlen(msgBuffer), 0);
+				memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);
+				memset(msgBuffer, '\0', sizeof(char)*BUFFER_LENGHT);}
 			}
-
-            
-            //send(newSocket, msgBuffer, strlen(msgBuffer), 0);    
-			memset(buffer, '\0', sizeof(char)*BUFFER_LENGHT);
-			memset(msgBuffer, '\0', sizeof(char)*BUFFER_LENGHT);}
 		printf("[+]Closing the connection.\n");
 		shutdown(newSocket, SHUT_RDWR);
 		exit(0);

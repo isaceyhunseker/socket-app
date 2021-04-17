@@ -46,7 +46,7 @@ void main(){
 		else
 			printf("Invalid command:(help to see all commands)");
 			
-		
+		printf("%s",rcvBuffer);
 		memset(rcvBuffer, '\0', sizeof(char)*BUFFER_LENGHT);
 	}
 	printf("[+]Closing the connection.\n");
