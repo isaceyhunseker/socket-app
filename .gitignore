@@ -54,3 +54,6 @@ dkms.conf
 # socket-app Project spesific output files
 server
 client
+client1
+client2
+
